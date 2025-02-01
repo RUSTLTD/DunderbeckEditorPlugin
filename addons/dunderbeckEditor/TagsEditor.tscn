@@ -1,0 +1,61 @@
+[gd_scene load_steps=4 format=3 uid="uid://bjriy2f1igur3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2fjc8"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jnmv0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8myv4"]
+
+[node name="Control" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -952.0
+offset_bottom = -448.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Selected tags"
+
+[node name="ExistingItems" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Item" type="HBoxContainer" parent="ExistingItems"]
+layout_mode = 2
+
+[node name="RemoveButton" type="Button" parent="ExistingItems/Item"]
+custom_minimum_size = Vector2(31, 0)
+layout_mode = 2
+text = "X"
+
+[node name="Label" type="Label" parent="ExistingItems/Item"]
+layout_mode = 2
+text = "None"
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Add tags"
+
+[node name="SearchInput" type="LineEdit" parent="."]
+layout_mode = 2
+placeholder_text = "Search..."
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+custom_minimum_size = Vector2(0, 125)
+layout_mode = 2
+
+[node name="SearchResults" type="ItemList" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/focus = SubResource("StyleBoxEmpty_2fjc8")
+theme_override_styles/selected = SubResource("StyleBoxEmpty_jnmv0")
+theme_override_styles/selected_focus = SubResource("StyleBoxEmpty_8myv4")
+auto_height = true
+item_count = 2
+item_0/text = "Option 1"
+item_1/text = "Option 2"
