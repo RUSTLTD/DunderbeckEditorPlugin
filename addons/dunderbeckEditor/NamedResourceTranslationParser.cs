@@ -9,17 +9,18 @@ public partial class NamedResourceTranslationParser : EditorTranslationParserPlu
 {
     public override string[] _GetRecognizedExtensions() => new[] { "tres" };
 
-    public override void _ParseFile(string path, GdCol.Array<string> msgids, GdCol.Array<GdCol.Array> msgidsContextPlural)
+    public override GdCol.Array<string[]> _ParseFile(string path)
     {
-        Resource resource = ResourceLoader.Load(path);
-
+        Godot.Collections.Array<string[]> ret = [];
         HashSet<string> propNames = ["Name", "Description"];
+        Resource resource = ResourceLoader.Load(path);
         foreach (string propName in propNames)
         {
             Variant stringVariant = resource.Get(propName);
-            if (stringVariant.VariantType != Variant.Type.String) return;
-            msgids.Add(stringVariant.AsString());
+            if (stringVariant.VariantType != Variant.Type.String) continue;
+            ret.Add([stringVariant.AsString()]);
         }
+        return ret;
     }
 }
 #endif
