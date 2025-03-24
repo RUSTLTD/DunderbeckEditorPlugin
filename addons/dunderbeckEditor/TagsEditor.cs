@@ -16,7 +16,7 @@ public partial class TagsEditor : EditorProperty
 
     public TagsEditor()
     {
-        Control control = ResourceLoader.Load<PackedScene>("res://addons/DunderbeckEditor/TagsEditor.tscn")
+        Control control = ResourceLoader.Load<PackedScene>("res://addons/dunderbeckEditor/TagsEditor.tscn")
             .Instantiate<Control>();
         AddChild(control);
 
