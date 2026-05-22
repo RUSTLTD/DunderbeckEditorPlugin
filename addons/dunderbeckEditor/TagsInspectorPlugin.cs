@@ -16,6 +16,10 @@ public partial class TagsInspectorPlugin : EditorInspectorPlugin
         if (type != Variant.Type.PackedStringArray) return false;
 
         // Do some reflection to determine what the enum type of the field is
+
+        // Ensure we aren't executing heavy reflection scripts on engine internals
+        if (name.StartsWith("metadata/") || name.StartsWith("script")) return false;
+
         var attribute = TagsEditor.GetAttribute(obj, name);
         if (attribute == null) return false;
 
@@ -23,7 +27,5 @@ public partial class TagsInspectorPlugin : EditorInspectorPlugin
         AddPropertyEditor(name, new TagsEditor());
         return true;
     }
-
-
 }
 #endif

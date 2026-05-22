@@ -13,6 +13,7 @@ public partial class TagsEditor : EditorProperty
     private LineEdit _searchInput;
     private ItemList _searchResults;
     private VBoxContainer _existingItems;
+    private PackedScene _itemTemplateScene;
 
     public TagsEditor()
     {
@@ -35,15 +36,17 @@ public partial class TagsEditor : EditorProperty
 
     private void Redraw()
     {
-        // Check what tags are assigned to the item currently
         var tags = GetEditedObject().Get(GetEditedProperty()).AsStringArray();
 
+        // Fetch UI template
         var itemControl = _existingItems.GetChild<Control>(0);
+        if (itemControl == null) return;
 
-        if (tags.Length > 0)
+        if (tags is {length: >0}
         {
             int existingChildren = _existingItems.GetChildCount();
             int iterations = Mathf.Max(tags.Length, existingChildren);
+            
             for (int i = 0; i < iterations; i++)
             {
                 if (i >= tags.Length)
@@ -55,43 +58,63 @@ public partial class TagsEditor : EditorProperty
                 Control item;
                 if (i >= existingChildren)
                 {
+                    // Duplicate template if we need more rows
                     item = (Control)itemControl.Duplicate();
                     _existingItems.AddChild(item);
                 }
-                else item = _existingItems.GetChild<Control>(i);
+                else 
+                {
+                    item = _existingItems.GetChild<Control>(i);
+                }
 
                 Button removeButton = item.GetNode<Button>("RemoveButton");
-                removeButton.Visible = true;
                 Label itemLabel = item.GetNode<Label>("Label");
 
+                removeButton.Visible = true;
                 itemLabel.Text = tags[i];
 
+                // Clear previous connections
                 ClearSignals(removeButton, BaseButton.SignalName.Pressed);
 
-                removeButton.Connect(BaseButton.SignalName.Pressed, new Callable(this, MethodName.RemoveTag));
+                // Pass the specific tag text directly
+                string currentTag = tags[i];
+                removeButton.Connect(BaseButton.SignalName.Pressed, 
+                    Callable.From(() => RemoveTag(currentTag)));
             }
         }
         else
         {
+            // Reset to "None"
             Button removeButton = itemControl.GetNode<Button>("RemoveButton");
             Label itemLabel = itemControl.GetNode<Label>("Label");
+            
             removeButton.Visible = false;
             itemLabel.Text = "None";
+            
+            ClearSignals(removeButton, BaseButton.SignalName.Pressed);
+            
+            // Clean up any extra duplicated rows
+            while (_existingItems.GetChildCount() > 1)
+            {
+                _existingItems.GetChild(1).QueueFree();
+            }
         }
 
-        DoSearch("");
+        DoSearch(_searchInput.Text);
     }
 
     private void DoSearch(string text)
     {
-        while (_searchResults.ItemCount > 0) _searchResults.RemoveItem(0);
+        _searchResults.Clear();
 
         var tags = GetEditedObject().Get(GetEditedProperty()).AsStringArray();
-
         TagsAttribute attribute = GetAttribute(GetEditedObject(), GetEditedProperty());
+        
+        if (attribute == null) return;
+
         foreach (var tag in Enum.GetNames(attribute.TagsEnumType))
         {
-            if (!tag.ToLower().Contains(text.ToLower())) continue;
+            if (!string.IsNullOrEmpty(text) && !tag.Contains(text, StringComparison.OrdinalIgnoreCase)) continue;
             if (tags.Contains(tag)) continue;
             _searchResults.AddItem(tag);
         }
@@ -100,19 +123,16 @@ public partial class TagsEditor : EditorProperty
     private void AddTag(long selectionIndex)
     {
         string tagToAdd = _searchResults.GetItemText((int)selectionIndex);
-
         var tags = GetEditedObject().Get(GetEditedProperty()).AsStringArray();
-        var withNewTag = tags.Concat(new[] { tagToAdd }).ToArray();
-        var newValue = Variant.From(withNewTag);
+        
+        if (tags.Contains(tagToAdd)) return;
 
-        EmitChanged(GetEditedProperty(), newValue);
+        var withNewTag = tags.Concat(new[] { tagToAdd }).ToArray();
+        EmitChanged(GetEditedProperty(), Variant.From(withNewTag));
     }
 
-    private void RemoveTag()
+    private void RemoveTag(string tagToRemove)
     {
-        Control button = GetViewport().GuiGetFocusOwner();
-        string tagToRemove = button.GetNode<Label>("../Label").Text;
-
         var tags = GetEditedObject().Get(GetEditedProperty()).AsStringArray();
         var withoutOldTag = tags.Where(t => t != tagToRemove).ToArray();
 
@@ -120,31 +140,17 @@ public partial class TagsEditor : EditorProperty
         GetEditedObject().Set(GetEditedProperty(), newValue);
 
         EmitChanged(GetEditedProperty(), newValue);
-        button.ReleaseFocus();
-    }
-
-    private void ClearSignals(GodotObject obj, StringName signalName)
-    {
-        var signals = obj.GetSignalConnectionList(signalName);
-        foreach (var signal in signals)
-        {
-            obj.Disconnect(signalName, signal["callable"].AsCallable());
-        }
     }
 
     public static TagsAttribute GetAttribute(GodotObject obj, string name)
     {
         if (obj.GetScript().Obj is not CSharpScript script) return null;
-        Type scriptType = ByName(Path.GetFileNameWithoutExtension(script.ResourcePath));
-        var member = scriptType.GetMember(name, (BindingFlags)62);
+        
+        var scriptType = script.New().GetType();
+        var member = scriptType.GetMember(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        
         if (member.Length == 0) return null;
-        if (Attribute.GetCustomAttribute(member[0], typeof(TagsAttribute)) is not TagsAttribute attribute) return null;
-        return attribute;
-    }
-
-    private static Type ByName(string name)
-    {
-        return Assembly.GetExecutingAssembly().GetTypes().First(t => t.Name == name);
+        return Attribute.GetCustomAttribute(member[0], typeof(TagsAttribute)) as TagsAttribute;
     }
 }
 #endif

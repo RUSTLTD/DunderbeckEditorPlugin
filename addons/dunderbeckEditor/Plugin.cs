@@ -23,13 +23,9 @@ public partial class Plugin : EditorPlugin
 	{
 		// Clean-up of the plugin goes here.
 		RemoveInspectorPlugin(_inspectorPlugin);
-		//RemoveExportPlugin(_exportVersion);
 		RemoveTranslationParserPlugin(_translationParser);
 	}
 
-	public override string _GetPluginName()
-	{
-		return "Dunderbeck Editor";
-	}
+	public override string _GetPluginName() => "Dunderbeck Editor";
 }
 #endif

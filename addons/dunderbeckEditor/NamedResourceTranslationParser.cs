@@ -1,24 +1,37 @@
 #if TOOLS
 using System.Collections.Generic;
 using Godot;
+using GdCol = Godot.Collections;
 
 namespace Dunderbeck.addons.DunderbeckEditor;
 
 [Tool]
 public partial class NamedResourceTranslationParser : EditorTranslationParserPlugin
 {
-    public override string[] _GetRecognizedExtensions() => new[] { "tres" };
+    public override string[] _GetRecognizedExtensions() => new[] { "tres", "res" };
 
-    public override GdCol.Array<string[]> _ParseFile(string path)
+    public override GdCol.Array<GdCol.Array<string>> _ParseFile(string path)
     {
-        Godot.Collections.Array<string[]> ret = [];
-        HashSet<string> propNames = ["Name", "Description"];
+        GdCol.Array<GdCol.Array<string>> ret = [];
+        string[] propNames = ["Name", "Description"];
+        
+        if (!ResourceLoader.Exists(path)) return ret;
+        
         Resource resource = ResourceLoader.Load(path);
+        if (resource == null) return ret;
+
         foreach (string propName in propNames)
         {
+            if (!resource.GetPropertyList().Any(p => p["name"].AsString() == propName)) continue;
+
             Variant stringVariant = resource.Get(propName);
             if (stringVariant.VariantType != Variant.Type.String) continue;
-            ret.Add([stringVariant.AsString()]);
+
+            string value = stringVariant.AsString();
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                ret.Add(new GdCol.Array<string> { value });
+            }
         }
         return ret;
     }
