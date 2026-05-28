@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Godot;
 
-#if TOOLS
+#if true
 namespace Dunderbeck.addons.DunderbeckEditor;
 
 [Tool]
@@ -42,7 +42,7 @@ public partial class TagsEditor : EditorProperty
         var itemControl = _existingItems.GetChild<Control>(0);
         if (itemControl == null) return;
 
-        if (tags is {length: >0})
+        if (tags is {Length: >0})
         {
             int existingChildren = _existingItems.GetChildCount();
             int iterations = Mathf.Max(tags.Length, existingChildren);
@@ -103,6 +103,20 @@ public partial class TagsEditor : EditorProperty
         DoSearch(_searchInput.Text);
     }
 
+    private void ClearSignals(GodotObject obj, StringName signalName)
+    {
+        var signals = obj.GetSignalConnectionList(signalName);
+        foreach (var signal in signals)
+        {
+            obj.Disconnect(signalName, signal["callable"].AsCallable());
+        }
+    }
+    private static Type ByName(string name)
+    {
+        return Assembly.GetExecutingAssembly().GetTypes().First(t => t.Name == name);
+        return Attribute.GetCustomAttribute(member[0], typeof(TagsAttribute)) as TagsAttribute;
+    }
+    
     private void DoSearch(string text)
     {
         _searchResults.Clear();
