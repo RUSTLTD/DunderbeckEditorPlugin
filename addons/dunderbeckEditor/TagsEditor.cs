@@ -114,7 +114,6 @@ public partial class TagsEditor : EditorProperty
     private static Type ByName(string name)
     {
         return Assembly.GetExecutingAssembly().GetTypes().First(t => t.Name == name);
-        return Attribute.GetCustomAttribute(member[0], typeof(TagsAttribute)) as TagsAttribute;
     }
     
     private void DoSearch(string text)
