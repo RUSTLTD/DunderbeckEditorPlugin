@@ -11,7 +11,7 @@ public partial class NamedResourceTranslationParser : EditorTranslationParserPlu
 
     public override Godot.Collections.Array<string[]> _ParseFile(string path)
     {
-        GdCol.Array<GdCol.Array<string>> ret = [];
+        Godot.Collections.Array<string[]> ret = [];
         string[] propNames = ["Name", "Description"];
         
         if (!ResourceLoader.Exists(path)) return ret;
@@ -29,7 +29,7 @@ public partial class NamedResourceTranslationParser : EditorTranslationParserPlu
             string value = stringVariant.AsString();
             if (!string.IsNullOrWhiteSpace(value))
             {
-                ret.Add(new GdCol.Array<string[]> { value });
+                ret.Add([value]);
             }
         }
         return ret;
