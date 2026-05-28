@@ -1,7 +1,6 @@
 #if TOOLS
 using System.Collections.Generic;
 using Godot;
-using GdCol = Godot.Collections;
 
 namespace Dunderbeck.addons.DunderbeckEditor;
 
@@ -10,7 +9,7 @@ public partial class NamedResourceTranslationParser : EditorTranslationParserPlu
 {
     public override string[] _GetRecognizedExtensions() => new[] { "tres", "res" };
 
-    public override GdCol.Array<GdCol.Array<string>> _ParseFile(string path)
+    public override Godot.Collections.Array<string[]> _ParseFile(string path)
     {
         GdCol.Array<GdCol.Array<string>> ret = [];
         string[] propNames = ["Name", "Description"];
@@ -30,7 +29,7 @@ public partial class NamedResourceTranslationParser : EditorTranslationParserPlu
             string value = stringVariant.AsString();
             if (!string.IsNullOrWhiteSpace(value))
             {
-                ret.Add(new GdCol.Array<string> { value });
+                ret.Add(new GdCol.Array<string[]> { value });
             }
         }
         return ret;
