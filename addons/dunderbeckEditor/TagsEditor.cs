@@ -42,7 +42,7 @@ public partial class TagsEditor : EditorProperty
         var itemControl = _existingItems.GetChild<Control>(0);
         if (itemControl == null) return;
 
-        if (tags is {length: >0}
+        if (tags is {length: >0})
         {
             int existingChildren = _existingItems.GetChildCount();
             int iterations = Mathf.Max(tags.Length, existingChildren);
